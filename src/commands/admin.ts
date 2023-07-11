@@ -1,4 +1,4 @@
-import { Client, Message, GuildChannel, GuildMember, Guild, Channel } from "discord.js";
+import { Client, Message, GuildChannel, GuildMember, Guild, Channel, Permissions as PermissionsBitField, PermissionString } from "discord.js";
 import { DiscordBot, MsgHelper } from "../general/discordBot";
 import { Logs } from "../general/logs";
 import { DB } from "../general/db";
@@ -6,12 +6,15 @@ import { DiscordServer } from "../general/db";
 import { serialize } from "v8";
 import { measureMemory } from "vm";
 import { CommandDB } from "./Command";
+
+
 export class AdminCommand extends CommandDB {
     //Only RoguishTiger or Kuriosly can set Admin rights 
     //ReeF: added myself for the tests, maybe for later use, dunno how active is Kuriosly
     public constructor(database: DB) {
         super(database);
     }
+    private perms:PermissionsBitField;
     private admins: string[] = ["687898043005272096", "271792666910392325", "607962880154927113", "477889434642153482"];
     private async setAdmin(message: Message, input: string[]) {
         if (this.admins.some(adminId => message.author.id == adminId)) {
@@ -200,7 +203,7 @@ export class AdminCommand extends CommandDB {
 
         //Check if the user has rights to change the primary mode (the commments implemented user.db but it's not used appereantly)
         if (!this.checkAccess(message)) {
-            message.reply("Only server admin can change the primary mode");
+            message.reply("Only manage channel permission can change the primary mode");
             return;
         }
 
@@ -225,7 +228,7 @@ export class AdminCommand extends CommandDB {
     }
     private async addChannel(message: Message, input: string[]) {
         if (!this.checkAccess(message)) {
-            message.reply("Only server admin can change oppositeChannels");
+            message.reply("Only manage channel permission can change oppositeChannels");
             return false;
         }
 
@@ -237,7 +240,7 @@ export class AdminCommand extends CommandDB {
             if (guild.channels.cache.some(channel => channel.id === input[0])) {
                 server.oppositeChannelIds.push(input[0]);
                 await this.database.putServer(server);
-                const channelName:string = await guild.channels.cache.find(channel => channel.id === input[0]).name;
+                const channelName: string = await guild.channels.cache.find(channel => channel.id === input[0]).name;
                 message.reply(`Channel "${channelName}" has been added to the list of opposite channels`);
                 return;
             }
@@ -255,7 +258,7 @@ export class AdminCommand extends CommandDB {
     }
     private async removeChannel(message: Message, input: string[]) {
         if (!this.checkAccess(message)) {
-            message.reply("Only server admin can remove oppositeChannels");
+            message.reply("Only manage channel permission can remove oppositeChannels");
             return false;
         }
 
@@ -270,19 +273,19 @@ export class AdminCommand extends CommandDB {
                 message.reply("The list of opposite channels has been cleared.");
                 return;
             }
-            if(await this.filterChannel(server, input[0], message)){
+            if (await this.filterChannel(server, input[0], message)) {
                 return;
             }
             message.reply("Invalid arguments, did you mean \"all\"?");
             return;
         }
-        if(await this.filterChannel(server, channel.id, message)){
+        if (await this.filterChannel(server, channel.id, message)) {
             return;
         }
         message.reply("This channel isn't in the opposite channels list, if you wish to add it, use $removechannel");
         return;
     }
-    private async filterChannel(server:DiscordServer, channelId:string, message:Message):Promise<boolean>{
+    private async filterChannel(server: DiscordServer, channelId: string, message: Message): Promise<boolean> {
         if (server.oppositeChannelIds.some(oppositeChannelId => oppositeChannelId === channelId)) {
             server.oppositeChannelIds = server.oppositeChannelIds.filter(id => id !== channelId);
             await this.database.putServer(server);
@@ -292,7 +295,9 @@ export class AdminCommand extends CommandDB {
         return false;
     }
     private checkAccess(message: Message): boolean {
-        return (message.member instanceof GuildMember) || this.admins.some(adminID => message.member.id === adminID)
+        const perms = message.member.permissionsIn(message.channel);
+        return  perms.has(PermissionsBitField.FLAGS.MANAGE_CHANNELS) || this.admins.some(adminID => message.member.id === adminID);
+        // message.member.permissions.has(PermissionsBitField.FLAGS.MANAGE_CHANNELS) //Only for Roles, not channel overwrites
     }
     private getOppositeChannelsReply(guild: Guild, channelIds: string[]): string {
         if (channelIds.length === 0) {
@@ -302,7 +307,7 @@ export class AdminCommand extends CommandDB {
         let names: string[] = this.getChannelNamesFromIds(guild, channelIds);
         return `opposite channels are: ${names.join(", ")}`;
     }
-    private getChannelNamesFromIds(guild:Guild, channelIds:string[]):string[]{
+    private getChannelNamesFromIds(guild: Guild, channelIds: string[]): string[] {
         let names: string[] = [];
 
         channelIds.forEach(async channelId => {

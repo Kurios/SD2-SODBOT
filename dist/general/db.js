@@ -88,7 +88,14 @@ const discordBot_1 = require("./discordBot");
 class DB {
     constructor() {
         this.redisClient = Redis.createClient();
-        let redisClient = Redis.createClient();
+    }
+    testServer() {
+        return __awaiter(this, void 0, void 0, function* () {
+            const servers = yield this.getAllServers();
+            yield servers.forEach((server) => __awaiter(this, void 0, void 0, function* () {
+                console.log(yield this.getFromRedis(server._id));
+            }));
+        });
     }
     setServer(server) {
         return __awaiter(this, void 0, void 0, function* () {

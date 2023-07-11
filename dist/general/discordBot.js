@@ -99,8 +99,8 @@ class DiscordBot {
     onReady(database) {
         return __awaiter(this, void 0, void 0, function* () {
             yield database.redisClient.connect();
-            yield database.redisSaveServers(null);
             yield database.saveNewServers(DiscordBot.bot);
+            yield database.testServer();
             logs_1.Logs.log("Bot Online!");
             DiscordBot.bot.user.setActivity("Use " + common_1.CommonUtil.config("prefix") + "help to see commands!", {
                 type: "LISTENING"
