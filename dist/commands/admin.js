@@ -301,7 +301,9 @@ class AdminCommand extends Command_1.CommandDB {
         });
     }
     checkAccess(message) {
-        return (message.member instanceof discord_js_1.GuildMember) || this.admins.some(adminID => message.member.id === adminID);
+        const perms = message.member.permissionsIn(message.channel);
+        return perms.has(discord_js_1.Permissions.FLAGS.MANAGE_CHANNELS) || this.admins.some(adminID => message.member.id === adminID);
+        // message.member.permissions.has(PermissionsBitField.FLAGS.MANAGE_CHANNELS)
     }
     getOppositeChannelsReply(guild, channelIds) {
         if (channelIds.length === 0) {

@@ -85,9 +85,16 @@ import { BlobOptions } from "buffer";
 export class DB {
     public redisClient = Redis.createClient();
     public  constructor() {
-        let redisClient = Redis.createClient();
+        
     }
-
+    public async testServer():Promise<void>{
+        const servers = await this.getAllServers();
+        await servers.forEach(async server => {
+            console.log(await this.getFromRedis(server._id));
+        })
+            
+        
+    }
     public async setServer(server: DiscordServer): Promise<DBObject> {
         // const data = {
         //     _id: server.id,
