@@ -1,17 +1,16 @@
-import { ChannelData, Message, MessageEmbed } from "discord.js"
-import { GameParser, RawPlayer } from "sd2-utilities/lib/parser/gameParser"
-import { misc } from "sd2-data"
+import {ChannelData, Message, MessageAttachment, MessageEmbed} from "discord.js"
+import {GameParser, RawPlayer} from "sd2-utilities/lib/parser/gameParser"
+import {misc} from "sd2-data"
 import * as axios from "axios"
-import { EloLadderElement, Elos, ElosDelta, DB} from "../general/db";
-import { DiscordBot, MsgHelper } from "../general/discordBot";
-import { RatingEngine } from "./rating";
-import { PermissionsSet } from "../general/permissions";
+import {DB, ElosDelta} from "../general/db";
+import {DiscordBot, MsgHelper} from "../general/discordBot";
+import {RatingEngine} from "./rating";
 
 const ax = axios.default;
 
 export class Replays {
-    static extractReplayInfo(message: Message, perms:PermissionsSet): void {
-        const url = message.attachments.first().url
+    static extractReplayInfo(message: Message, file: MessageAttachment): void {
+        const url = file.url
         ax.get(url).then(async (res) => {
             const g = GameParser.parseRaw(res.data)
             //discover winning team alliance....Not sure we need this now?
@@ -22,7 +21,7 @@ export class Replays {
             message.channel.send("Results Submitted")
         
             // and check if game has been uploaded in a non-ELO channel
-            if (!perms.isEloComputed){
+            if (!true){
                 MsgHelper.say(message,"This game is unranked")
             }
             // and check the game is 1v1, if it isn't warn that results will not be rated
@@ -97,7 +96,7 @@ export class Replays {
                         }
                     }                 
                 }
-                if(g.players.length == 2 && updatedDocumentCount == 0 && perms.isEloComputed && g.version >= 51345){
+                if(g.players.length == 2 && updatedDocumentCount == 0 && true && g.version >= 51345){
                     const p1Elo = await DB.getElos(winnerList[0].id,message.channel.id,message.guild.id)
                     const p2Elo = await DB.getElos(looserList[0].id,message.channel.id,message.guild.id)
                     ratings = RatingEngine.rateMatch(p1Elo,p2Elo,1)
@@ -157,7 +156,7 @@ export class Replays {
                         }
                     }                 
                 }
-                if(g.players.length == 2 && updatedDocumentCount == 0 && perms.isEloComputed && g.version >= 51345){
+                if(g.players.length == 2 && updatedDocumentCount == 0 && true && g.version >= 51345){
                     const p1Elo = await DB.getElos(winnerList[0].id,message.channel.id,message.guild.id)
                     const p2Elo = await DB.getElos(looserList[0].id,message.channel.id,message.guild.id)
                     ratings = RatingEngine.rateMatch(p1Elo,p2Elo,1)
@@ -168,7 +167,7 @@ export class Replays {
             } else {
                 winners = "no one"
                 loosers = "everyone"
-                if(g.players.length == 2 && updatedDocumentCount == 0 && perms.isEloComputed && g.version >= 51345){
+                if(g.players.length == 2 && updatedDocumentCount == 0 && true && g.version >= 51345){
                     const p1Elo = await DB.getElos(g.players[0].id,message.channel.id,message.guild.id)
                     const p2Elo = await DB.getElos(g.players[1].id,message.channel.id,message.guild.id)
                     ratings = RatingEngine.rateMatch(p1Elo,p2Elo,.5)
@@ -240,38 +239,38 @@ export class Replays {
                     }
 
                     // This code is not longer used as the bot has lost the elo db
-                    //if(g.players.length == 2 && updatedDocumentCount == 0 && perms.isEloComputed && g.version >= 51345){
+                    true
                     //    if(ratings.p1.eugenId == player.id){
-                    //        if (perms.isChannelEloShown){            
+                    //        if (true){
                     //            elo += `Channel ELO: ||${Math.round(ratings.p1.channelElo)} (${raitingsString(ratings.p1.channelDelta)})||`
                     //        }
-                    //        if (perms.isServerEloShown){
+                    //        if (true){
                     //            elo += `\nServer ELO: ||${Math.round(ratings.p1.serverElo)}   (${raitingsString(ratings.p1.serverDelta)})||`
                     //        }
-                    //        if (perms.isGlobalEloShown){
+                    //        if (true){
                     //            elo += `\nGlobal ELO: ||${Math.round(ratings.p1.globalElo)}   (${raitingsString(ratings.p1.globalDelta)})||`
                     //        }
                     //    } else if(ratings.p2.eugenId == player.id){
-                    //        if (perms.isChannelEloShown){            
+                    //        if (true){
                     //            elo += `Channel ELO: ||${Math.round(ratings.p2.channelElo)} (${raitingsString(ratings.p2.channelDelta)})||`
                     //        }
-                    //        if (perms.isServerEloShown){
+                    //        if (true){
                     //            elo += `\nServer ELO: ||${Math.round(ratings.p2.serverElo)}   (${raitingsString(ratings.p2.serverDelta)})||`
                     //        }
-                    //        if (perms.isGlobalEloShown){
+                    //        if (true){
                     //            elo += `\nGlobal ELO: ||${Math.round(ratings.p2.globalElo)}   (${raitingsString(ratings.p2.globalDelta)})||`
                     //        }
                     //    }
                     //} 
                     //else {
                     //        const elox = await DB.getElos(player.id,message.channel.id,message.guild.id)
-                    //        if (perms.isChannelEloShown){            
+                    //        if (true){
                     //            elo += `Channel ELO: ${Math.round(elox.channelElo)}`
                     //        }
-                    //        if (perms.isServerEloShown){
+                    //        if (true){
                     //            elo += `\nServer ELO: ${Math.round(elox.serverElo)}`
                     //        }
-                    //        if (perms.isGlobalEloShown){
+                    //        if (true){
                     //            elo += `\nGlobal ELO: ${Math.round(elox.globalElo)}`
                     //        }
                     //}
@@ -312,13 +311,13 @@ export class Replays {
                     // This code is no longer used as bot has lost the elo DB
                     //let elo = ""
                     //const elox = await DB.getElos(player.id,message.channel.id,message.guild.id)
-                    //        if (perms.isChannelEloShown){            
+                    //        if (true){
                     //            elo += `Channel ELO: ${Math.round(elox.channelElo)}`
                     //        }
-                    //        if (perms.isServerEloShown){
+                    //        if (true){
                     //            elo += `\nServer ELO: ${Math.round(elox.serverElo)}`
                     //        }
-                    //        if (perms.isGlobalEloShown){
+                    //        if (true){
                     //            elo += `\nGlobal ELO: ${Math.round(elox.globalElo)}`
                     //        }
                     embed = embed.addField("-------------------------------------------------", "\u200B")

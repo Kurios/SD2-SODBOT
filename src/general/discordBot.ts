@@ -80,17 +80,8 @@ export class DiscordBot {
             }
         }
 
-        if (message.attachments.first()) {
-            const perms = Permissions.getPermissions(channel, guild)
-            if (!(await perms).areReplaysBlocked) {
-                if (message.attachments.first().url.endsWith(".rpl3")) {
-                    if (message.channel.type !== "dm") {
-                        Replays.extractReplayInfo(message, (await perms));
-                    }
-                }
-            }
-        }
-
+        const replayFiles = [...message.attachments.values()].filter( file => file.url.includes(".rpl3") )
+        replayFiles.map( file => Replays.extractReplayInfo(message, file))
     }
 
     private async onReady() {
